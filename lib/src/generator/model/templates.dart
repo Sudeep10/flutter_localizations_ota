@@ -17,7 +17,7 @@ class @(baseClass)Remote extends @(baseClass) {
   final @(baseClass) base;
   final ArbWorker _arb;
   
-  static const LocalizationsDelegate<@(baseClass)> delegate = _L10nDelegateWithOta(L10n.delegate);
+  static const LocalizationsDelegate<@(baseClass)> delegate = _@(baseClass)DelegateWithOta(@(baseClass).delegate);
   
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -39,7 +39,6 @@ class @(baseClass)Remote extends @(baseClass) {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = @(baseClass).supportedLocales;
 ''';
-
 
 const footer = '''
 class _@(baseClass)DelegateWithOta extends LocalizationsDelegate<@(baseClass)> {

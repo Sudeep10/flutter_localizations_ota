@@ -37,16 +37,17 @@ Future<void> generate([String path = 'l10n.yaml']) async {
         final key = line.split(' ')[1].split('(').first;
         final paramPairs = lines[i].split('(').last.split(')')[0].split(',');
 
+        // Parameters map of entries name:type, e.g. 'count':'int'
         final parameters = <String, String>{};
 
         for (var pair in paramPairs) {
           final parts = pair.trim().split(' ');
-          parameters[parts[0].trimRight()] = parts[1].trimLeft();
+          parameters[parts[1].trimRight()] = parts[0].trimLeft();
         }
 
         output.writeln(_generateMethod(key, parameters));
       }
-    } else if(line.startsWith('//')) {
+    } else if (line.startsWith('//')) {
       lastComments.add(lines[i]);
     } else {
       lastComments.clear();
@@ -66,11 +67,13 @@ String _generateField(String key) {
 }
 
 String _generateMethod(String key, Map<String, String> parameters) {
-  final sParameters = parameters.entries.map((e) => '${e.key} ${e.value}').join(', ');
-  final sParameterNames = parameters.values.join(', ');
+  final sParameters =
+      parameters.entries.map((e) => '${e.value} ${e.key}').join(', ');
+  final sParameterNames = parameters.keys.join(', ');
 
   // like _arb.get('title', {'name': name}) for arb string '"title": "translated title {name}"'
-  final sArbCall = '_arb.get(\'$key\', {${parameters.values.map((e) => '\'$e\': $e').join(', ')}})';
+  final sArbCall =
+      '_arb.get(\'$key\', {${parameters.keys.map((e) => '\'$e\': $e').join(', ')}})';
 
   return '\tString $key($sParameters) => $sArbCall ?? base.$key($sParameterNames);';
 }

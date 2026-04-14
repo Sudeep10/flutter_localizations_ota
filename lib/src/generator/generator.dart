@@ -35,15 +35,17 @@ Future<void> generate([String path = 'l10n.yaml']) async {
         output.writeln(_generateField(key));
       } else {
         final key = line.split(' ')[1].split('(').first;
-        final paramPairs = lines[i].split('(').last.split(')')[0].split(',');
+        final methodSignature = _getMethodSignature(lines, i);
+        i += methodSignature.length - 1;
+        final paramPairs =
+            methodSignature.join(' ').split('(').last.split(')')[0].split(',');
 
-        // Parameters map of entries name:type, e.g. 'count':'int'
-        final parameters = <String, String>{};
-
-        for (var pair in paramPairs) {
-          final parts = pair.trim().split(' ');
-          parameters[parts[1].trimRight()] = parts[0].trimLeft();
-        }
+        // Parameters map of name:type, e.g. 'count':'int'
+        final parameters = {
+          for (final pair in paramPairs)
+            if (pair.trim().split(' ') case final parts when parts.length > 1)
+              parts[1].trimRight(): parts[0].trimLeft(),
+        };
 
         output.writeln(_generateMethod(key, parameters));
       }
@@ -60,6 +62,15 @@ Future<void> generate([String path = 'l10n.yaml']) async {
   output.writeln(footer.replaceAll('@(baseClass)', yaml.outputClass).trim());
 
   await output.close();
+}
+
+List<String> _getMethodSignature(List<String> lines, int start) {
+  for (var i = start; i < lines.length; i++) {
+    if (lines[i].contains(';')) {
+      return lines.sublist(start, i + 1);
+    }
+  }
+  return lines.sublist(start);
 }
 
 String _generateField(String key) {

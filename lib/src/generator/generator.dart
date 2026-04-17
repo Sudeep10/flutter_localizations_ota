@@ -35,18 +35,21 @@ Future<void> generate([String path = 'l10n.yaml']) async {
         output.writeln(_generateField(key));
       } else {
         final key = line.split(' ')[1].split('(').first;
-        final paramPairs = lines[i].split('(').last.split(')')[0].split(',');
+        final methodSignature = _getMethodSignature(lines, i);
+        i += methodSignature.length - 1;
+        final paramPairs =
+            methodSignature.join(' ').split('(').last.split(')')[0].split(',');
 
-        final parameters = <String, String>{};
-
-        for (var pair in paramPairs) {
-          final parts = pair.trim().split(' ');
-          parameters[parts[0].trimRight()] = parts[1].trimLeft();
-        }
+        // Parameters map of name:type, e.g. 'count':'int'
+        final parameters = {
+          for (final pair in paramPairs)
+            if (pair.trim().split(' ') case final parts when parts.length > 1)
+              parts[1].trimRight(): parts[0].trimLeft(),
+        };
 
         output.writeln(_generateMethod(key, parameters));
       }
-    } else if(line.startsWith('//')) {
+    } else if (line.startsWith('//')) {
       lastComments.add(lines[i]);
     } else {
       lastComments.clear();
@@ -61,16 +64,27 @@ Future<void> generate([String path = 'l10n.yaml']) async {
   await output.close();
 }
 
+List<String> _getMethodSignature(List<String> lines, int start) {
+  for (var i = start; i < lines.length; i++) {
+    if (lines[i].contains(';')) {
+      return lines.sublist(start, i + 1);
+    }
+  }
+  return lines.sublist(start);
+}
+
 String _generateField(String key) {
   return '\tString get $key => _arb.get(\'$key\') ?? base.$key;';
 }
 
 String _generateMethod(String key, Map<String, String> parameters) {
-  final sParameters = parameters.entries.map((e) => '${e.key} ${e.value}').join(', ');
-  final sParameterNames = parameters.values.join(', ');
+  final sParameters =
+      parameters.entries.map((e) => '${e.value} ${e.key}').join(', ');
+  final sParameterNames = parameters.keys.join(', ');
 
   // like _arb.get('title', {'name': name}) for arb string '"title": "translated title {name}"'
-  final sArbCall = '_arb.get(\'$key\', {${parameters.values.map((e) => '\'$e\': $e').join(', ')}})';
+  final sArbCall =
+      '_arb.get(\'$key\', {${parameters.keys.map((e) => '\'$e\': $e').join(', ')}})';
 
   return '\tString $key($sParameters) => $sArbCall ?? base.$key($sParameterNames);';
 }

@@ -31,7 +31,10 @@ Future<void> generate([String path = 'l10n.yaml']) async {
       }
 
       if (line.startsWith('String get')) {
-        final key = line.split('get')[1].split(';')[0].trim();
+        final key = line
+            .substring(line.indexOf("get") + 3)
+            .split(";")[0]
+            .trim();
         output.writeln(_generateField(key));
       } else {
         final key = line.split(' ')[1].split('(').first;

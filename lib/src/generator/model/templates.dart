@@ -2,8 +2,7 @@
 
 const header = '''
 import '@(baseClassFile)';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:material_ui/material_ui.dart';
 
 // ignore_for_file: type=lint
 
@@ -31,9 +30,7 @@ class @(baseClass)Remote extends @(baseClass) {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
+    ...GlobalMaterialLocalizations.delegates,
   ];
   
   /// A list of this localizations delegate's supported locales.
